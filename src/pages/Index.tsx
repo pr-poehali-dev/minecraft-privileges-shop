@@ -2,21 +2,30 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Icon from "@/components/ui/icon";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [balance, setBalance] = useState(0);
+  const [nickname, setNickname] = useState("");
+  const [isOnServer, setIsOnServer] = useState(false);
+  const [selectedPrivilege, setSelectedPrivilege] = useState<string | null>(null);
+  const { toast } = useToast();
   const privileges = [
     {
       name: "ВИП",
-      price: 80,
+      price: 100,
       color: "text-primary",
       bgColor: "bg-primary/10 hover:bg-primary/20",
       icon: "Star",
       features: [
-        "Цветной ник в чате",
-        "Доступ к /fly",
-        "3 приватных региона",
-        "VIP префикс",
-        "Эксклюзивные киты"
+        "КД ТП на спавн 8 сек",
+        "Привилегия в Discord",
+        "Префикс VIP",
+        "200$ на баланс Minecraft"
       ]
     },
     {
@@ -28,11 +37,9 @@ const Index = () => {
       popular: true,
       features: [
         "Всё из ВИП",
-        "Креативный режим",
-        "10 приватных регионов",
-        "Premium префикс",
-        "Доступ к /back",
-        "Уникальные частицы"
+        "КД ТП на спавн 5 сек",
+        "400$ на баланс",
+        "Префикс Premium"
       ]
     },
     {
@@ -42,16 +49,50 @@ const Index = () => {
       bgColor: "bg-secondary/10 hover:bg-secondary/20",
       icon: "Sparkles",
       features: [
-        "Всё из ПРЕМИУМ",
-        "Неограниченные регионы",
-        "Доступ к /god",
-        "Повелитель префикс",
+        "Всё из Премиум",
+        "600$ на баланс",
         "Приоритет в очереди",
-        "Своя команда на сервере",
-        "Эксклюзивные эффекты"
+        "Префикс Повелитель",
+        "ТП на спавн 3 сек"
       ]
     }
   ];
+
+  const handlePurchase = (privilegeName: string, price: number) => {
+    if (!nickname.trim()) {
+      toast({
+        title: "Ошибка",
+        description: "Введите ваш никнейм",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!isOnServer) {
+      toast({
+        title: "Ошибка",
+        description: "Вы должны быть на сервере для покупки",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (balance < price) {
+      toast({
+        title: "Недостаточно средств",
+        description: `Не хватает ${price - balance}₽. Пополните баланс.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setBalance(balance - price);
+    toast({
+      title: "Успешная покупка!",
+      description: `Привилегия ${privilegeName} активирована для ${nickname}`,
+    });
+    setSelectedPrivilege(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
@@ -63,11 +104,32 @@ const Index = () => {
                 <Icon name="Sword" size={28} className="text-background" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">MineCraft Shop</h1>
+                <h1 className="text-2xl font-bold">MedievalLand</h1>
                 <p className="text-sm text-muted-foreground">Магазин привилегий</p>
               </div>
             </div>
-
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Баланс</p>
+                <p className="text-xl font-bold text-accent">{balance} ₽</p>
+              </div>
+              <Button 
+                onClick={() => {
+                  const amount = prompt("Введите сумму пополнения (₽):");
+                  if (amount && !isNaN(Number(amount))) {
+                    setBalance(balance + Number(amount));
+                    toast({
+                      title: "Баланс пополнен!",
+                      description: `+${amount}₽ добавлено на ваш счёт`
+                    });
+                  }
+                }}
+                className="bg-accent hover:bg-accent/90 text-background font-bold minecraft-shadow"
+              >
+                <Icon name="Wallet" size={20} className="mr-2" />
+                Пополнить баланс
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -123,15 +185,63 @@ const Index = () => {
               </CardContent>
 
               <CardFooter>
-                <Button 
-                  className={`w-full font-bold text-lg py-6 minecraft-shadow hover:translate-y-[-2px] transition-transform ${
-                    privilege.name === "ВИП" ? "bg-primary hover:bg-primary/90 text-background" :
-                    privilege.name === "ПРЕМИУМ" ? "bg-accent hover:bg-accent/90 text-background" :
-                    "bg-secondary hover:bg-secondary/90 text-foreground"
-                  }`}
-                >
-                  Купить {privilege.name}
-                </Button>
+                <Dialog open={selectedPrivilege === privilege.name} onOpenChange={(open) => !open && setSelectedPrivilege(null)}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={() => setSelectedPrivilege(privilege.name)}
+                      className={`w-full font-bold text-lg py-6 minecraft-shadow hover:translate-y-[-2px] transition-transform ${
+                        privilege.name === "ВИП" ? "bg-primary hover:bg-primary/90 text-background" :
+                        privilege.name === "ПРЕМИУМ" ? "bg-accent hover:bg-accent/90 text-background" :
+                        "bg-secondary hover:bg-secondary/90 text-foreground"
+                      }`}
+                    >
+                      Купить {privilege.name}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Покупка привилегии {privilege.name}</DialogTitle>
+                      <DialogDescription>
+                        Стоимость: {privilege.price}₽ | Ваш баланс: {balance}₽
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nickname">Ваш никнейм в Minecraft</Label>
+                        <Input 
+                          id="nickname" 
+                          placeholder="Steve123"
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="onServer"
+                          checked={isOnServer}
+                          onChange={(e) => setIsOnServer(e.target.checked)}
+                          className="w-4 h-4"
+                        />
+                        <Label htmlFor="onServer" className="cursor-pointer">
+                          Я нахожусь на сервере прямо сейчас
+                        </Label>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button 
+                        onClick={() => handlePurchase(privilege.name, privilege.price)}
+                        className={`w-full font-bold ${
+                          privilege.name === "ВИП" ? "bg-primary hover:bg-primary/90" :
+                          privilege.name === "ПРЕМИУМ" ? "bg-accent hover:bg-accent/90" :
+                          "bg-secondary hover:bg-secondary/90"
+                        }`}
+                      >
+                        Подтвердить покупку
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardFooter>
             </Card>
           ))}
@@ -168,7 +278,16 @@ const Index = () => {
 
       <footer className="border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2024 MineCraft Shop. Все привилегии выдаются навсегда</p>
+          <p className="mb-2">© 2024 MedievalLand. Все привилегии выдаются навсегда</p>
+          <a 
+            href="https://t.me/PandAss1" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            <Icon name="Send" size={18} />
+            @PandAss1 — Связь с разработчиком
+          </a>
         </div>
       </footer>
     </div>
