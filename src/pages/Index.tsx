@@ -7,16 +7,15 @@ const Index = () => {
   const privileges = [
     {
       name: "ВИП",
-      price: 80,
+      price: 100,
       color: "text-primary",
       bgColor: "bg-primary/10 hover:bg-primary/20",
       icon: "Star",
       features: [
-        "Цветной ник",
-        "Приватный чат",
-        "3 дома",
-        "Доступ к /fly",
-        "VIP префикс"
+        "КД ТП на спавн 8 сек",
+        "Привилегия в Discord",
+        "Префикс VIP",
+        "200$ на баланс"
       ]
     },
     {
@@ -28,11 +27,9 @@ const Index = () => {
       popular: true,
       features: [
         "Всё из ВИП",
-        "Креативный режим",
-        "10 домов",
-        "Кит каждые 12 часов",
-        "Premium префикс",
-        "Доступ к /back"
+        "КД ТП на спавн 5 сек",
+        "400$ на баланс",
+        "Префикс Premium"
       ]
     },
     {
@@ -42,13 +39,11 @@ const Index = () => {
       bgColor: "bg-secondary/10 hover:bg-secondary/20",
       icon: "Sparkles",
       features: [
-        "Всё из ПРЕМИУМ",
-        "Неограниченно домов",
-        "Кит каждый час",
-        "God префикс",
-        "Доступ к /god",
+        "Всё из Премиум",
+        "600$ на баланс",
         "Приоритет в очереди",
-        "Своя команда"
+        "Префикс Повелитель",
+        "ТП на спавн 3 сек"
       ]
     }
   ];
@@ -63,10 +58,14 @@ const Index = () => {
                 <Icon name="Sword" size={28} className="text-background" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">MineCraft Shop</h1>
+                <h1 className="text-2xl font-bold">MedievalLand</h1>
                 <p className="text-sm text-muted-foreground">Магазин привилегий</p>
               </div>
             </div>
+            <Button className="bg-accent hover:bg-accent/90 text-background font-bold minecraft-shadow">
+              <Icon name="Wallet" size={20} className="mr-2" />
+              Пополнить баланс
+            </Button>
           </div>
         </div>
       </header>
@@ -167,7 +166,16 @@ const Index = () => {
 
       <footer className="border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2024 MineCraft Shop. Все привилегии выдаются навсегда</p>
+          <p className="mb-2">© 2024 MedievalLand. Все привилегии выдаются навсегда</p>
+          <a 
+            href="https://t.me/PandAss1" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            <Icon name="Send" size={18} />
+            @PandAss1 — Связь с разработчиком
+          </a>
         </div>
       </footer>
     </div>
