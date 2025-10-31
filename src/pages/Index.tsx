@@ -13,7 +13,11 @@ const Index = () => {
   const [nickname, setNickname] = useState("");
   const [isOnServer, setIsOnServer] = useState(false);
   const [selectedPrivilege, setSelectedPrivilege] = useState<string | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
   const { toast } = useToast();
+  
+  const PAYMENT_PHONE = "89869628865";
   const privileges = [
     {
       name: "ВИП",
@@ -113,22 +117,90 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">Баланс</p>
                 <p className="text-xl font-bold text-accent">{balance} ₽</p>
               </div>
-              <Button 
-                onClick={() => {
-                  const amount = prompt("Введите сумму пополнения (₽):");
-                  if (amount && !isNaN(Number(amount))) {
-                    setBalance(balance + Number(amount));
-                    toast({
-                      title: "Баланс пополнен!",
-                      description: `+${amount}₽ добавлено на ваш счёт`
-                    });
-                  }
-                }}
-                className="bg-accent hover:bg-accent/90 text-background font-bold minecraft-shadow"
-              >
-                <Icon name="Wallet" size={20} className="mr-2" />
-                Пополнить баланс
-              </Button>
+              <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-accent hover:bg-accent/90 text-background font-bold minecraft-shadow"
+                  >
+                    <Icon name="Wallet" size={20} className="mr-2" />
+                    Пополнить баланс
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Пополнение баланса</DialogTitle>
+                    <DialogDescription>
+                      Переведите деньги на номер телефона для пополнения
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">Сумма пополнения (₽)</Label>
+                      <Input 
+                        id="amount" 
+                        type="number"
+                        placeholder="1000"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                      />
+                    </div>
+                    <div className="bg-card border-2 border-accent/50 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Номер телефона:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-lg">{PAYMENT_PHONE}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              navigator.clipboard.writeText(PAYMENT_PHONE);
+                              toast({
+                                title: "Скопировано!",
+                                description: "Номер скопирован в буфер обмена"
+                              });
+                            }}
+                          >
+                            <Icon name="Copy" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• Переведите {paymentAmount || "указанную"} ₽ на номер выше</p>
+                        <p>• В комментарии укажите ваш никнейм</p>
+                        <p>• После перевода нажмите "Я оплатил"</p>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex-col gap-2">
+                    <Button
+                      onClick={() => {
+                        if (!paymentAmount || isNaN(Number(paymentAmount)) || Number(paymentAmount) <= 0) {
+                          toast({
+                            title: "Ошибка",
+                            description: "Введите корректную сумму",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+                        setBalance(balance + Number(paymentAmount));
+                        toast({
+                          title: "Баланс пополнен!",
+                          description: `+${paymentAmount}₽ добавлено на счёт`
+                        });
+                        setPaymentAmount("");
+                        setShowPaymentDialog(false);
+                      }}
+                      className="w-full bg-accent hover:bg-accent/90"
+                    >
+                      <Icon name="CheckCircle" size={18} className="mr-2" />
+                      Я оплатил
+                    </Button>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Баланс обновится автоматически после проверки платежа
+                    </p>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
